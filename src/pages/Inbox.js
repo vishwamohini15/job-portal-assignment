@@ -1,31 +1,32 @@
 import React, { useEffect, useState } from 'react';
 
-const Inbox = () => {
-  const [inbox, setInbox] = useState([]);
+function InboxPage({ role }) {
+  const [emails, setEmails] = useState([]);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('inbox')) || [];
-    setInbox(stored);
-  }, []);
+    const allEmails = JSON.parse(localStorage.getItem('emails')) || [];
+    const filtered = allEmails.filter(email => email.to === role);
+    setEmails(filtered);
+  }, [role]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">📬 Inbox</h2>
-      {inbox.length === 0 ? (
-        <p>No emails yet.</p>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h2 className="text-xl font-bold mb-4">Inbox - {role}</h2>
+      {emails.length === 0 ? (
+        <p className="text-gray-500">No messages yet.</p>
       ) : (
-        <ul className="space-y-4">
-          {inbox.map((mail) => (
-            <li key={mail.id} className="bg-white p-4 rounded shadow">
-              <p className="text-sm text-gray-500 mb-1">{mail.date}</p>
-              <h4 className="font-semibold">{mail.subject}</h4>
-              <pre className="text-sm text-gray-700 whitespace-pre-wrap mt-1">{mail.message}</pre>
+        <ul className="space-y-3">
+          {emails.map(email => (
+            <li key={email.id} className="p-4 border rounded shadow bg-white">
+              <p className="font-semibold">{email.subject}</p>
+              <p className="text-sm text-gray-600">{email.timestamp}</p>
+              <p>{email.content}</p>
             </li>
           ))}
         </ul>
       )}
     </div>
   );
-};
+}
 
-export default Inbox;
+export default InboxPage;

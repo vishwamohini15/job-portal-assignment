@@ -11,7 +11,7 @@ function SalaryRangeSlider({ value, onChange }) {
         trackClassName="track"
         value={value}
         onChange={onChange}
-        min={10000}
+        min={1000}
         max={100000}
         step={5000}
         minDistance={10000}

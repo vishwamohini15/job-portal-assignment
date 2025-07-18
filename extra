@@ -1,0 +1,190 @@
+import React, { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { RoleContext } from '../context/RoleContext';
+
+const HomePage = () => {
+  const { role } = useContext(RoleContext);
+  const [latestJobs, setLatestJobs] = useState([]);
+
+  useEffect(() => {
+    const storedJobs = JSON.parse(localStorage.getItem('jobs')) || [];
+    const sortedJobs = storedJobs.slice().reverse().slice(0, 4); // Latest 4 jobs
+    setLatestJobs(sortedJobs);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-6">
+      {/* Hero Section */}
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 py-12">
+        <div className="md:w-1/2 text-center md:text-left">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            {role === 'seeker'
+              ? 'Find Your Dream Job Today!'
+              : 'Hire Top Talent Effortlessly'}
+          </h1>
+          <p className="text-lg text-gray-600 mb-6">
+            {role === 'seeker'
+              ? 'Browse thousands of jobs, apply instantly, and track your applications all in one place.'
+              : 'Post jobs, manage applicants, and make smarter hiring decisions with analytics.'}
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+            <Link
+              to="/jobs"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow"
+            >
+              Browse Jobs
+            </Link>
+
+            {role === 'employer' && (
+              <Link
+                to="/post-job"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow"
+              >
+                Post a Job
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Hero Illustration */}
+        <div className="md:w-1/2">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/9482/9482214.png"
+            alt="Job Portal Illustration"
+            className="w-full max-w-sm mx-auto"
+          />
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="max-w-6xl mx-auto mt-16 px-4 text-center">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-8">
+          Why Choose Jobify?
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded shadow hover:shadow-lg transition">
+            <h3 className="font-bold text-lg text-blue-600 mb-2">Smart Job Matching</h3>
+            <p className="text-gray-600">
+              We match candidates with jobs based on skills, salary, and preferences.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded shadow hover:shadow-lg transition">
+            <h3 className="font-bold text-lg text-green-600 mb-2">Real-Time Application Tracker</h3>
+            <p className="text-gray-600">
+              Stay updated with multi-step tracking of every job application.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded shadow hover:shadow-lg transition">
+            <h3 className="font-bold text-lg text-purple-600 mb-2">Resume Builder & PDF Export</h3>
+            <p className="text-gray-600">
+              Create professional resumes in minutes using our drag-and-drop builder.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Latest Jobs Section */}
+      <div className="max-w-6xl mx-auto mt-20 px-4">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">📢 Latest Job Openings</h2>
+        {latestJobs.length === 0 ? (
+          <p className="text-gray-600">No jobs posted yet. Be the first to post one!</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {latestJobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white p-4 rounded shadow hover:shadow-lg transition"
+              >
+                <h3 className="text-lg font-bold text-blue-700">{job.title}</h3>
+                <p className="text-gray-600">{job.location}</p>
+                <p className="text-gray-700 mt-1">💰 ₹{job.salary?.min?.toLocaleString()} - ₹{job.salary?.max?.toLocaleString()}</p>
+                <p className="text-sm text-gray-500 mt-2 truncate">{job.description}</p>
+                <Link
+                  to="/jobs"
+                  className="mt-3 inline-block text-blue-600 hover:underline text-sm"
+                >
+                  View & Apply →
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
+
+
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+import HomePage from './pages/HomePage';
+import JobPostPage from './pages/JobPostPage';
+import JobListPage from './pages/JobListPage';
+import DashboardPage from './pages/DashboardPage';
+import ResumeBuilderPage from './pages/ResumeBuilderPage';
+import ApplicantsPage from './pages/ApplicantsPage';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import CompanyDirectory from './pages/CompanyDirectory';
+import PostJobWizard from './pages/PostJobWizard';
+import RecommendedJobs from './pages/RecommendedJobs';
+import HiringBoard from './pages/HiringBoard';
+import Inbox from './pages/Inbox';
+// import Login from './pages/Login';
+// import Signup from './pages/Signup';
+
+import Navbar from './components/Navbar';
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { RoleProvider } from './context/RoleContext';
+import { UserProvider } from './context/UserContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+
+// ✅ Private Route to restrict access
+const PrivateRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+};
+
+function App() {
+  return (
+    <Router>
+      <RoleProvider>
+        <UserProvider>
+          <AuthProvider>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage/>} />
+              <Route path="/signup" element={<SignupPage/>} />
+              <Route path="/jobs" element={<JobListPage />} />
+
+              {/* ✅ Protected Routes */}
+              <Route path="/post-job" element={<PrivateRoute><JobPostPage /></PrivateRoute>} />
+              <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+              <Route path="/resume-builder" element={<PrivateRoute><ResumeBuilderPage /></PrivateRoute>} />
+              <Route path="/applicants" element={<PrivateRoute><ApplicantsPage /></PrivateRoute>} />
+              <Route path="/analytics" element={<PrivateRoute><AnalyticsDashboard /></PrivateRoute>} />
+              <Route path="/companies" element={<PrivateRoute><CompanyDirectory /></PrivateRoute>} />
+              <Route path="/post-job-wizard" element={<PrivateRoute><PostJobWizard /></PrivateRoute>} />
+              <Route path="/recommended" element={<PrivateRoute><RecommendedJobs /></PrivateRoute>} />
+              <Route path="/pipeline" element={<PrivateRoute><HiringBoard /></PrivateRoute>} />
+              <Route path="/inbox" element={<PrivateRoute><Inbox /></PrivateRoute>} />
+            </Routes>
+
+            <ToastContainer position="top-right" autoClose={3000} />
+          </AuthProvider>
+        </UserProvider>
+      </RoleProvider>
+    </Router>
+  );
+}
+
+export default App;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function DashboardPage({ role }) {
   const [applications, setApplications] = useState([]);
@@ -40,6 +41,8 @@ function DashboardPage({ role }) {
             })}
           </div>
         )}
+
+        
       </div>
     );
   }
@@ -70,6 +73,16 @@ function DashboardPage({ role }) {
           ))}
         </div>
       )}
+      
+      <button className="mt-6 bg-yellow-400 p-4 text-black font-bold">
+      <Link
+        to="/applicants"
+        className="text-sm text-blue-600 underline hover:text-blue-800"
+      >
+        View Applicants
+      </Link>
+    </button>
+     
     </div>
   );
 }

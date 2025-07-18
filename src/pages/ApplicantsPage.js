@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendEmail } from '../utils/emailSimulator';
 
 const statusOptions = ['applied', 'review', 'interview', 'selected', 'rejected'];
 
@@ -14,16 +15,29 @@ function ApplicantsPage() {
   }, []);
 
   const handleStatusChange = (jobId, newStatus) => {
-    const updated = applications.map(app => {
-      if (app.jobId === jobId) {
-        return { ...app, status: newStatus };
-      }
-      return app;
-    });
+  const updated = applications.map(app => {
+    if (app.jobId === jobId) {
+      // 🔔 Send notification only when status actually changes
+      const job = jobs.find(j => j.id === app.jobId);
 
-    localStorage.setItem('applications', JSON.stringify(updated));
-    setApplications(updated);
-  };
+      if (newStatus === 'selected') {
+        sendEmail('seeker', 'Application Selected', `🎉 Congratulations! You have been selected for the ${job?.title} role.`);
+      } else if (newStatus === 'interview') {
+        sendEmail('seeker', 'Interview Scheduled', `📅 Interview scheduled for job: ${job?.title}. Please check your inbox.`);
+      } else if (newStatus === 'rejected') {
+        sendEmail('seeker', 'Application Rejected', `❌ Unfortunately, your application for ${job?.title} was not selected.`);
+      }
+
+      return { ...app, status: newStatus };
+    }
+    return app;
+  });
+
+  localStorage.setItem('applications', JSON.stringify(updated));
+  setApplications(updated);
+};
+
+  
 
   return (
     <div className="p-6 max-w-3xl mx-auto">

@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 
 
 function Navbar({ role, setRole }) {
-  const handleToggle = () => {
-    setRole(prev => (prev === 'seeker' ? 'employer' : 'seeker'));
-  };
+ const handleToggle = () => {
+  const newRole = role === 'seeker' ? 'employer' : 'seeker';
+  setRole(newRole);
+};
 // localStorage.setItem('userRole', 'employer');
 
 //   useEffect(() => {
@@ -24,9 +25,12 @@ function Navbar({ role, setRole }) {
   <Link to="/jobs">Jobs</Link>
   {role === 'employer' && <Link to="/post-job">Post a Job</Link>}
   <Link to="/dashboard">Dashboard</Link>
-  <Link to="/resume-builder">Resume Builder</Link>
   <Link to="/companies" className="hover:underline">Companies</Link>
-<Link to="/post-job-wizard">Post a Job</Link>
+{role === 'employer' && (
+  <Link to="/post-job-wizard" className="hover:underline">
+    Post a Job (Wizard)
+  </Link>
+)}
 
   
   {role?.toLowerCase() === 'employer' && (
@@ -48,6 +52,7 @@ function Navbar({ role, setRole }) {
   <Link to="/pipeline" className="hover:underline">Hiring Pipeline</Link>
 )}
 <Link to="/inbox">Inbox</Link>
+            <Link to="/resume" className="hover:underline">Resume Builder</Link>
 
 
         <button

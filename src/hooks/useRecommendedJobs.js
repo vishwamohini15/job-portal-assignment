@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import useCompatibilityScore from './useCompatibilityScore';
+import calculateScore from './useCompatibilityScore';
 
 const useRecommendedJobs = () => {
   const [recommended, setRecommended] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
-  const calculateScore = useCompatibilityScore();
+  // const calculateScore = useCompatibilityScore();
 
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem('userProfile'));

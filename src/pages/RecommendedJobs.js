@@ -24,7 +24,7 @@ const RecommendedJobs = () => {
               <p className="text-sm text-gray-600">{job.company} • {job.location}</p>
               <p className="text-sm mt-1">Score: {job.score}%</p>
               <Link
-                to={`/jobs/${job.id}`}
+                to={`/jobs`}
                 className="text-blue-600 underline text-sm mt-2 inline-block"
               >
                 View Details

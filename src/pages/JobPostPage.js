@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { sendEmail } from '../utils/emailSimulator';
 
 function JobPostPage({ role }) {
   const [job, setJob] = useState({
     title: '',
     description: '',
     location: '',
-    salary: '',
+    salary: { min: '', max: '' },
     skills: ''
   });
 
@@ -37,6 +38,8 @@ function JobPostPage({ role }) {
       skills: ''
     });
     alert("Job posted successfully!");
+   sendEmail('employer', 'Job Posted Successfully', `You have posted a new job: ${job.title}`);
+sendEmail('seeker', 'New Job Posted', `A new job has been posted: ${job.title}`);
   };
 
   if (role !== 'employer') {
@@ -78,14 +81,29 @@ function JobPostPage({ role }) {
           required
         />
         <input
-          type="number"
-          name="salary"
-          placeholder="Salary (in ₹)"
-          value={job.salary}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-        />
+  type="number"
+  name="minSalary"
+  placeholder="Minimum Salary (₹)"
+  value={job.salary.min}
+  onChange={(e) =>
+    setJob({ ...job, salary: { ...job.salary, min: e.target.value } })
+  }
+  className="w-full border p-2 rounded"
+  required
+/>
+
+<input
+  type="number"
+  name="maxSalary"
+  placeholder="Maximum Salary (₹)"
+  value={job.salary.max}
+  onChange={(e) =>
+    setJob({ ...job, salary: { ...job.salary, max: e.target.value } })
+  }
+  className="w-full border p-2 rounded"
+  required
+/>
+
         <input
           type="text"
           name="skills"

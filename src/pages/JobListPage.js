@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import userProfile from '../data/userProfile';
+// import useCompatibilityScore from '../hooks/useCompatibilityScore';
 import CompatibilityRing from '../components/CompatibilityRing';
 import SalaryRangeSlider from '../components/SalaryRangeSlider';
-import ApplicationTracker from '../components/ApplicationTracker';
-import SkillTags from '../components/SkillTags';
-import { notifySuccess } from '../utils/notify';
-// import userProfile from '../data/userProfile'; // already imported
-import templates from '../data/emailTemplates';
-import { sendEmail } from '../utils/emailSimulator';
-
 
 
 function JobListPage({ role }) {
@@ -21,6 +15,7 @@ function JobListPage({ role }) {
   const [minSalary, setMinSalary] = useState('');
   const [skillFilter, setSkillFilter] = useState('');
   const [salaryRange, setSalaryRange] = useState([10000, 100000]);
+
 
   const navigate = useNavigate();
 
@@ -36,19 +31,12 @@ function JobListPage({ role }) {
     const newApp = {
       jobId,
       status: 'applied',
-      date: new Date().toISOString(),
+      date: new Date().toISOString()
     };
     const updatedApps = [...appliedJobs, newApp];
     localStorage.setItem('applications', JSON.stringify(updatedApps));
     setAppliedJobs(updatedApps);
-      notifySuccess("You have successfully applied for the job!");
-    // alert('Applied successfully!');
-
-    sendEmail(
-  'employer@example.com',
-  'New Application Received',
-  templates.applicationReceived('User123', 'Frontend Developer')
-);
+    alert('Applied successfully!');
   };
 
   const hasApplied = (jobId) => {
@@ -74,10 +62,7 @@ function JobListPage({ role }) {
     const locationMatch = locationFilter
       ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
       : true;
-    const salaryMatch =
-  Number(job.salary) >= salaryRange[0] &&
-  Number(job.salary) <= salaryRange[1];
-
+   const salaryMatch = minSalary ? Number(job.salary?.min || 0) >= Number(minSalary) : true;
     const skillsMatch = skillFilter
       ? job.skills.toLowerCase().includes(skillFilter.toLowerCase())
       : true;
@@ -119,8 +104,10 @@ function JobListPage({ role }) {
           onChange={(e) => setSkillFilter(e.target.value)}
           className="border p-2 rounded w-full"
         />
-         <div className="col-span-1 md:col-span-4">
-    <SalaryRangeSlider value={salaryRange} onChange={setSalaryRange} />
+
+          <div className="col-span-1 md:col-span-4">
+    <SalaryRangeSlider value={salaryRange} onChange={setSalaryRange} /> 
+    
   </div>
       </div>
 
@@ -129,27 +116,37 @@ function JobListPage({ role }) {
         <p>No jobs match your criteria.</p>
       ) : (
         <div className="space-y-4">
-         {filteredJobs.map((job) => {
+          {filteredJobs.map((job) => {
   let score = null;
   if (role === 'seeker') {
-    // Move hook logic inside function — not actually using React hook!
-    const jobSkills = job.skills.toLowerCase().split(',').map(s => s.trim());
-    const userSkills = userProfile.skills.toLowerCase().split(',').map(s => s.trim());
-    const matchedSkills = jobSkills.filter(skill => userSkills.includes(skill));
-    const skillScore = (matchedSkills.length / jobSkills.length) * 100;
-    const locationScore = job.location.toLowerCase() === userProfile.location.toLowerCase() ? 100 : 0;
-    const salaryScore = Number(job.salary) >= Number(userProfile.expectedSalary) ? 100 : 0;
-    score = Math.round((skillScore + locationScore + salaryScore) / 3);
-  }
+  const jobSkills = Array.isArray(job.skills)
+    ? job.skills.map(s => s.trim().toLowerCase())
+    : (job.skills || '').toLowerCase().split(',').map(s => s.trim());
+
+  const userSkills = Array.isArray(userProfile.skills)
+    ? userProfile.skills.map(s => s.trim().toLowerCase())
+    : (userProfile.skills || '').toLowerCase().split(',').map(s => s.trim());
+
+  const matchedSkills = jobSkills.filter(skill => userSkills.includes(skill));
+  const skillScore = jobSkills.length > 0 ? (matchedSkills.length / jobSkills.length) * 100 : 0;
+
+  const locationScore =
+    job.location?.toLowerCase() === userProfile.location?.toLowerCase() ? 100 : 0;
+
+  const salaryScore =
+    Number(job.salary) >= Number(userProfile.expectedSalary) ? 100 : 0;
+
+  score = Math.round((skillScore + locationScore + salaryScore) / 3);
+}
+
 
   return (
     <div key={job.id} className="p-4 border rounded shadow bg-white">
       <h3 className="text-lg font-semibold">{job.title}</h3>
       <p className="text-gray-700">{job.description}</p>
       <p className="mt-2"><strong>Location:</strong> {job.location}</p>
-      <p><strong>Salary:</strong> ₹{job.salary}</p>
-      <p><strong>Skills:</strong></p>
-<SkillTags jobSkills={job.skills} userSkills={userProfile.skills} />
+      <p><strong>Salary:</strong> ₹{job.salary.min} - ₹{job.salary.max}</p>
+      <p><strong>Skills:</strong> {job.skills}</p>
 
       {role === 'seeker' && (
         <div className="flex items-center justify-between mt-4">
@@ -164,14 +161,6 @@ function JobListPage({ role }) {
             onClick={() => handleApply(job.id)}
           >
             {hasApplied(job.id) ? 'Already Applied' : 'Apply'}
-            {hasApplied(job.id) && (
-  <ApplicationTracker
-    status={
-      appliedJobs.find(app => app.jobId === job.id)?.status || 'applied'
-    }
-  />
-)}
-
           </button>
         </div>
       )}
