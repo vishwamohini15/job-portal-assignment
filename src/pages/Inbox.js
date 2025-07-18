@@ -10,17 +10,21 @@ function InboxPage({ role }) {
   }, [role]);
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Inbox - {role}</h2>
+    <div className="px-4 py-6 max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Inbox - {role}</h2>
+
       {emails.length === 0 ? (
-        <p className="text-gray-500">No messages yet.</p>
+        <p className="text-gray-500 text-sm">No messages yet.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-5">
           {emails.map(email => (
-            <li key={email.id} className="p-4 border rounded shadow bg-white">
-              <p className="font-semibold">{email.subject}</p>
-              <p className="text-sm text-gray-600">{email.timestamp}</p>
-              <p>{email.content}</p>
+            <li
+              key={email.id}
+              className="bg-white border border-gray-200 rounded-xl p-5 shadow-md hover:shadow-lg transition-all"
+            >
+              <p className="font-semibold text-lg text-gray-800">{email.subject}</p>
+              <p className="text-xs text-gray-500 mb-2">{email.timestamp}</p>
+              <p className="text-sm text-gray-700">{email.content}</p>
             </li>
           ))}
         </ul>

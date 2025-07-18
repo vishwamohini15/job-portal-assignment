@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import userProfile from '../data/userProfile';
-// import useCompatibilityScore from '../hooks/useCompatibilityScore';
 import CompatibilityRing from '../components/CompatibilityRing';
 import SalaryRangeSlider from '../components/SalaryRangeSlider';
 
-
 function JobListPage({ role }) {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
-  const [minSalary, setMinSalary] = useState('');
   const [skillFilter, setSkillFilter] = useState('');
   const [salaryRange, setSalaryRange] = useState([10000, 100000]);
-
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const storedJobs = JSON.parse(localStorage.getItem('jobs')) || [];
@@ -29,10 +24,14 @@ function JobListPage({ role }) {
 
   const handleApply = (jobId) => {
     const newApp = {
+      id: Date.now().toString(),
       jobId,
       status: 'applied',
-      date: new Date().toISOString()
+      appliedDate: new Date().toISOString(),
+      applicantId: userProfile.id,
+      applicantName: userProfile.name || 'Job Seeker',
     };
+
     const updatedApps = [...appliedJobs, newApp];
     localStorage.setItem('applications', JSON.stringify(updatedApps));
     setAppliedJobs(updatedApps);
@@ -40,7 +39,7 @@ function JobListPage({ role }) {
   };
 
   const hasApplied = (jobId) => {
-    return appliedJobs.some(app => app.jobId === jobId);
+    return appliedJobs.some(app => app.jobId === jobId && app.applicantId === userProfile.id);
   };
 
   const handleDelete = (id) => {
@@ -54,7 +53,7 @@ function JobListPage({ role }) {
   };
 
   const handleEdit = (job) => {
-    navigate(`/edit-job/${job.id}`);
+    navigate('/post-job', { state: { jobToEdit: job } });
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -62,131 +61,191 @@ function JobListPage({ role }) {
     const locationMatch = locationFilter
       ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
       : true;
-   const salaryMatch = minSalary ? Number(job.salary?.min || 0) >= Number(minSalary) : true;
+
+    const jobMinSalary = job.salary?.min || 0;
+    const jobMaxSalary = job.salary?.max || Infinity;
+    const salaryMatch =
+      jobMinSalary <= salaryRange[1] && jobMaxSalary >= salaryRange[0];
+
+    const jobSkillsArray = Array.isArray(job.skills)
+      ? job.skills
+      : job.skills?.split(',').map(s => s.trim()) || [];
+
     const skillsMatch = skillFilter
-      ? job.skills.toLowerCase().includes(skillFilter.toLowerCase())
+      ? jobSkillsArray.some(skill =>
+          skill.toLowerCase().includes(skillFilter.toLowerCase())
+        )
       : true;
 
     return titleMatch && locationMatch && salaryMatch && skillsMatch;
   });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Available Jobs</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl font-extrabold text-gray-900 mb-8 text-center">
+          Explore Amazing Job Opportunities 🚀
+        </h2>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search by title"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          placeholder="Filter by location"
-          value={locationFilter}
-          onChange={(e) => setLocationFilter(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="number"
-          placeholder="Min salary (₹)"
-          value={minSalary}
-          onChange={(e) => setMinSalary(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          placeholder="Filter by skills"
-          value={skillFilter}
-          onChange={(e) => setSkillFilter(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
+        {/* Filters */}
+        <div className="bg-white p-6 rounded-2xl shadow-xl mb-10 border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-800 mb-5">Filter Jobs</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <input
+              type="text"
+              placeholder="Search by title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+            />
+            <input
+              type="text"
+              placeholder="Filter by location..."
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+            />
+            <input
+              type="text"
+              placeholder="Filter by skills (e.g., React, SQL)..."
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+              className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+            />
+            <div className="col-span-full lg:col-span-1 flex items-center gap-2 bg-gray-50 rounded-lg border border-gray-200 px-4 py-3">
+              <span className="text-gray-700 font-medium">Salary:</span>
+              <SalaryRangeSlider value={salaryRange} onChange={setSalaryRange} />
+            </div>
+          </div>
+        </div>
 
-          <div className="col-span-1 md:col-span-4">
-    <SalaryRangeSlider value={salaryRange} onChange={setSalaryRange} /> 
-    
-  </div>
+        {/* Job Listings */}
+        {filteredJobs.length === 0 ? (
+          <div className="text-center bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+            <p className="text-2xl text-gray-600 font-medium">
+              No jobs match your current filters. Try broadening your search.
+            </p>
+            <img
+              src="https://cdni.iconscout.com/illustration/premium/thumb/empty-state-1634869-1389069.png"
+              alt="No results"
+              className="mx-auto mt-8 h-48 opacity-70"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredJobs.map((job) => {
+              let score = null;
+
+              if (role === 'seeker') {
+                const jobSkills = Array.isArray(job.skills)
+                  ? job.skills.map(s => s.trim().toLowerCase())
+                  : (job.skills || '').split(',').map(s => s.trim().toLowerCase());
+
+                const userSkills = Array.isArray(userProfile.skills)
+                  ? userProfile.skills.map(s => s.trim().toLowerCase())
+                  : (userProfile.skills || '').split(',').map(s => s.trim().toLowerCase());
+
+                const matchedSkills = jobSkills.filter(skill =>
+                  userSkills.includes(skill)
+                );
+
+                const skillScore = jobSkills.length
+                  ? (matchedSkills.length / jobSkills.length) * 100
+                  : 0;
+
+                const locationScore =
+                  job.location?.toLowerCase() === userProfile.location?.toLowerCase()
+                    ? 100
+                    : 0;
+
+                const userExpectedSalary = Number(userProfile.expectedSalary);
+                const jobMin = job.salary?.min || 0;
+                const jobMax = job.salary?.max || Infinity;
+
+                let salaryScore = 0;
+                if (userExpectedSalary >= jobMin && userExpectedSalary <= jobMax) {
+                  salaryScore = 100;
+                } else if (userExpectedSalary < jobMin) {
+                  salaryScore = 50;
+                } else {
+                  salaryScore = 20;
+                }
+
+                score = Math.round((skillScore + locationScore + salaryScore) / 3);
+              }
+
+              return (
+                <div
+                  key={job.id}
+                  className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 flex flex-col justify-between hover:shadow-xl transition-transform transform hover:scale-[1.01]"
+                >
+                  <div>
+                    <h3 className="text-2xl font-bold text-blue-700 mb-2">{job.title}</h3>
+                    <p className="text-gray-700 text-sm mb-3 line-clamp-3">{job.description}</p>
+
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
+                      <p className="flex items-center">
+                        <span className="font-medium mr-1">Location:</span> {job.location}
+                      </p>
+                      <p className="flex items-center">
+                        <span className="font-medium mr-1">Salary:</span> ₹{job.salary?.min} - ₹{job.salary?.max}
+                      </p>
+                      <p className="col-span-2 flex items-start">
+                        <span className="font-medium mr-1">Skills:</span>
+                        <span className="flex flex-wrap gap-1">
+                          {(Array.isArray(job.skills) ? job.skills : job.skills?.split(',')).map((skill, i) => (
+                            <span
+                              key={i}
+                              className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                            >
+                              {skill.trim()}
+                            </span>
+                          ))}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  {role === 'seeker' && (
+                    <div className="flex items-center justify-between mt-4 border-t pt-4">
+                      <CompatibilityRing score={score} />
+                      <button
+                        className={`px-5 py-2 rounded-full font-semibold text-white transition duration-300 ${
+                          hasApplied(job.id)
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                        }`}
+                        disabled={hasApplied(job.id)}
+                        onClick={() => handleApply(job.id)}
+                      >
+                        {hasApplied(job.id) ? 'Applied' : 'Apply Now'}
+                      </button>
+                    </div>
+                  )}
+
+                  {role === 'employer' && (
+                    <div className="flex justify-end gap-3 mt-4 border-t pt-4">
+                      <button
+                        onClick={() => handleEdit(job)}
+                        className="px-4 py-2 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow-md"
+                      >
+                        Edit Job
+                      </button>
+                      <button
+                        onClick={() => handleDelete(job.id)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md"
+                      >
+                        Delete Job
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      {/* Job Cards */}
-      {filteredJobs.length === 0 ? (
-        <p>No jobs match your criteria.</p>
-      ) : (
-        <div className="space-y-4">
-          {filteredJobs.map((job) => {
-  let score = null;
-  if (role === 'seeker') {
-  const jobSkills = Array.isArray(job.skills)
-    ? job.skills.map(s => s.trim().toLowerCase())
-    : (job.skills || '').toLowerCase().split(',').map(s => s.trim());
-
-  const userSkills = Array.isArray(userProfile.skills)
-    ? userProfile.skills.map(s => s.trim().toLowerCase())
-    : (userProfile.skills || '').toLowerCase().split(',').map(s => s.trim());
-
-  const matchedSkills = jobSkills.filter(skill => userSkills.includes(skill));
-  const skillScore = jobSkills.length > 0 ? (matchedSkills.length / jobSkills.length) * 100 : 0;
-
-  const locationScore =
-    job.location?.toLowerCase() === userProfile.location?.toLowerCase() ? 100 : 0;
-
-  const salaryScore =
-    Number(job.salary) >= Number(userProfile.expectedSalary) ? 100 : 0;
-
-  score = Math.round((skillScore + locationScore + salaryScore) / 3);
-}
-
-
-  return (
-    <div key={job.id} className="p-4 border rounded shadow bg-white">
-      <h3 className="text-lg font-semibold">{job.title}</h3>
-      <p className="text-gray-700">{job.description}</p>
-      <p className="mt-2"><strong>Location:</strong> {job.location}</p>
-      <p><strong>Salary:</strong> ₹{job.salary.min} - ₹{job.salary.max}</p>
-      <p><strong>Skills:</strong> {job.skills}</p>
-
-      {role === 'seeker' && (
-        <div className="flex items-center justify-between mt-4">
-          <CompatibilityRing score={score} />
-          <button
-            className={`px-4 py-1 rounded ${
-              hasApplied(job.id)
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
-            disabled={hasApplied(job.id)}
-            onClick={() => handleApply(job.id)}
-          >
-            {hasApplied(job.id) ? 'Already Applied' : 'Apply'}
-          </button>
-        </div>
-      )}
-
-      {role === 'employer' && (
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => handleEdit(job)}
-            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => handleDelete(job.id)}
-            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Delete
-          </button>
-        </div>
-      )}
-    </div>
-  );
-})}
-
-        </div>
-      )}
     </div>
   );
 }

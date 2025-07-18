@@ -6,7 +6,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const storedJobs = JSON.parse(localStorage.getItem('jobs')) || [];
-    const sortedJobs = storedJobs.slice().reverse(); // Latest first
+    const sortedJobs = storedJobs.slice().reverse();
     setLatestJobs(sortedJobs.slice(0, 3));
   }, []);
 
@@ -40,26 +40,26 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-green-50 px-4 py-12 space-y-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-12 space-y-16 sm:px-6 lg:px-8">
       {/* Hero Section */}
-      <div className="max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
-          Welcome to Jobify Portal 🚀
+      <div className="max-w-4xl mx-auto text-center py-8 md:py-12">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-5 text-gray-900 leading-tight">
+          Find Your Dream Job with Jobify 🚀
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Your one-stop platform to post, apply, and manage jobs with smart matching, resume builder, and real-time tracking.
+        <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-2xl mx-auto">
+          Your intelligent platform to discover, apply, and manage jobs. Featuring smart matching, an intuitive resume builder, and real-time application tracking.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Link
             to="/jobs"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-105"
           >
-            Browse Jobs
+            Explore Jobs
           </Link>
           <Link
             to="/post-job"
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow"
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-3 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-105"
           >
             Post a Job
           </Link>
@@ -67,42 +67,54 @@ const HomePage = () => {
       </div>
 
       {/* Course Section */}
-       <div className="max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">🔥 Popular Courses</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🔥 Popular Courses</h2>
+        {/* Horizontal scroll for small screens, grid for larger screens */}
+        <div className="flex overflow-x-auto pb-4 -mx-4 px-4 sm:px-0 sm:mx-0 lg:grid lg:grid-cols-4 md:grid-cols-2 md:w-full gap-6 custom-scrollbar-hide">
           {dummyCourses.map((course, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-xl border border-gray-200 shadow hover:shadow-md transition"
+              className="flex-none w-72 md:w-auto bg-white p-6 rounded-xl border border-gray-200 shadow-md flex flex-col justify-between transform transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg"
             >
-              <h3 className="text-lg font-bold text-purple-800">{course.name}</h3>
-              <p className="text-sm text-gray-600 mt-2">{course.offer}</p>
-              <p className="text-xl font-semibold text-green-600 mt-2">{course.price}</p>
-              <button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded">
-                Buy Course
-              </button>
+              <div className="flex-grow">
+                <h3 className="text-xl font-bold text-purple-700 mb-2">{course.name}</h3>
+                <p className="text-sm text-gray-600 mb-3">{course.offer}</p>
+              </div>
+              <div className="mt-auto">
+                <p className="text-2xl font-extrabold text-green-600 mb-4">{course.price}</p>
+                <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition-colors duration-200">
+                  Buy Now
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-
       {/* Latest Job Posts */}
       {latestJobs.length > 0 && (
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Latest Job Posts</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">✨ Latest Job Posts</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {latestJobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white p-6 rounded-xl shadow border border-gray-200 hover:shadow-lg transition"
+                className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col justify-between transform transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg"
               >
-                <h3 className="text-xl font-semibold text-blue-800">{job.title}</h3>
-                <p className="text-gray-600">{job.company}</p>
-                <p className="text-sm text-gray-500 mb-4">{job.location}</p>
+                <div>
+                  <h3 className="text-xl font-semibold text-blue-800 mb-1">{job.title}</h3>
+                  <p className="text-gray-700 mb-1">{job.company}</p>
+                  <p className="text-sm text-gray-500 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {job.location}
+                  </p>
+                </div>
                 <Link
                   to="/jobs"
-                  className="text-sm text-blue-600 hover:underline font-medium"
+                  className="mt-4 inline-block text-blue-600 hover:text-blue-800 font-semibold text-base transition-colors duration-200"
                 >
                   View Details →
                 </Link>
@@ -113,23 +125,29 @@ const HomePage = () => {
       )}
 
       {/* Older Dummy Jobs */}
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Older Job Posts</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">⭐ Other Opportunities</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {dummyJobs.map((job, index) => (
             <div
               key={index}
-              className="bg-white p-5 rounded-xl shadow border border-gray-100 hover:shadow-md transition"
+              className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col justify-between transform transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg"
             >
-              <h3 className="text-lg font-bold text-green-800">{job.title}</h3>
-              <p className="text-gray-600">{job.company}</p>
-              <p className="text-sm text-gray-500">{job.location}</p>
+              <div>
+                <h3 className="text-xl font-semibold text-green-800 mb-1">{job.title}</h3>
+                <p className="text-gray-700 mb-1">{job.company}</p>
+                <p className="text-sm text-gray-500 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {job.location}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       </div>
-
-     
     </div>
   );
 };

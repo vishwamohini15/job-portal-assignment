@@ -36,3 +36,64 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* src/index.css or src/App.css */
+
+.nav-link {
+  position: relative;
+  color: white;
+  padding-bottom: 0.25rem; /* For the underline effect */
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #e0e7ff; /* Lighter blue on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #fcd34d; /* Yellow underline */
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link-active {
+  color: #fcd34d; /* Active link color (yellow) */
+  transform: translateY(-2px); /* Slight lift */
+}
+
+.nav-link-active::after {
+  width: 100%;
+  background-color: #fcd34d; /* Ensure active underline is yellow */
+}
+
+/* Mobile Links Styling */
+.nav-link-mobile {
+  width: 100%;
+  text-align: center;
+  padding: 0.75rem 0;
+  color: white;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-link-mobile:hover {
+  background-color: #3b82f6; /* A slightly lighter blue for hover */
+  color: white;
+}
+
+/* If you want the mobile active links to also have a specific style */
+.nav-link-mobile.nav-link-active {
+  background-color: #2563eb; /* Darker blue when active */
+  color: #fcd34d; /* Yellow text for active mobile link */
+}

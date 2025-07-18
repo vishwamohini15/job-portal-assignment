@@ -10,13 +10,13 @@ const CompanyDirectory = () => {
     setJobs(storedJobs);
   }, []);
 
-  // Unique real companies from localStorage
+  // Extract unique companies
   const realCompanies = [...new Set(jobs.map(job => job.company))].map(name => ({
     name,
     logo: `https://ui-avatars.com/api/?name=${name}&background=random`,
   }));
 
-  // 5 Dummy Companies
+  // Static dummy companies
   const dummyCompanies = [
     {
       name: "TechNova",
@@ -46,17 +46,26 @@ const CompanyDirectory = () => {
   ];
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Company Profiles</h2>
+    <div className="px-4 py-8 max-w-7xl mx-auto">
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+        Company Profiles
+        <div className="w-20 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto mt-2 rounded-full" />
+      </h2>
+
+      {/* Responsive grid for all company cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Dummy Companies */}
+        {/* Dummy company cards */}
         {dummyCompanies.map((dummy, index) => (
-          <DummyCompanyCard key={index} company={dummy} />
+          <div key={index} className="rounded-xl overflow-hidden bg-white border shadow-sm hover:shadow-lg transition duration-300">
+            <DummyCompanyCard company={dummy} />
+          </div>
         ))}
 
-        {/* Real Companies */}
+        {/* Real company cards from localStorage */}
         {realCompanies.map((company, index) => (
-          <CompanyCard key={index} company={company} jobs={jobs} />
+          <div key={index} className="rounded-xl overflow-hidden bg-white border shadow-sm hover:shadow-lg transition duration-300">
+            <CompanyCard company={company} jobs={jobs} />
+          </div>
         ))}
       </div>
     </div>
